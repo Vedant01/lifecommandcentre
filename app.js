@@ -110,13 +110,19 @@ let syncEnabled = false;
 
 // Initialize Supabase client
 function initSupabase() {
-    if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        syncEnabled = true;
-        updateSyncUI();
-        console.log('✅ Supabase connected');
-    } else {
-        console.log('⚠️ Supabase config not found - running in local-only mode');
+    try {
+        if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            syncEnabled = true;
+            updateSyncUI();
+            console.log('✅ Supabase connected');
+        } else {
+            console.log('⚠️ Supabase not available - running in local-only mode');
+            syncEnabled = false;
+        }
+    } catch (e) {
+        console.error('Supabase init failed:', e);
+        syncEnabled = false;
     }
 }
 
@@ -131,9 +137,9 @@ function init() {
     checkMarinatingArticles();
     setInterval(checkMarinatingArticles, 3600000);
 
-    // Initial sync from cloud on load
+    // Initial sync from cloud on load (async, won't block, silent)
     if (syncEnabled) {
-        pullFromCloud();
+        pullFromCloud(false).catch(e => console.error('Initial sync failed:', e));
     }
 }
 
@@ -197,9 +203,9 @@ async function syncToCloud() {
 }
 
 // Pull from Supabase
-async function pullFromCloud() {
+async function pullFromCloud(showErrors = true) {
     if (!supabase || !syncEnabled) {
-        showToast('warning', 'Cloud sync not configured');
+        if (showErrors) showToast('warning', 'Cloud sync not configured');
         return;
     }
 
@@ -210,21 +216,26 @@ async function pullFromCloud() {
             .eq('id', 'default_user')
             .single();
 
-        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+        // Handle various error cases gracefully
+        if (error) {
+            // PGRST116 = no rows found, 42P01 = table doesn't exist
+            if (error.code === 'PGRST116' || error.code === '42P01' || error.message?.includes('does not exist')) {
+                console.log('⚠️ No cloud data yet or table not set up');
+                return;
+            }
+            throw error;
+        }
 
         if (data?.data && Object.keys(data.data).length > 0) {
             appData = { ...defaultData, ...data.data };
             localStorage.setItem('lifeCommandCenter', JSON.stringify(appData));
             renderDashboard();
-            showToast('success', '⬇️ Data loaded from cloud!');
+            if (showErrors) showToast('success', '⬇️ Data loaded from cloud!');
             console.log('✅ Data pulled from Supabase');
-        } else {
-            // No data in cloud yet, push current data
-            await syncToCloud();
         }
     } catch (e) {
         console.error('Pull failed:', e);
-        showToast('error', 'Pull failed: ' + e.message);
+        if (showErrors) showToast('error', 'Pull failed: ' + e.message);
     }
 }
 
