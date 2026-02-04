@@ -3,6 +3,10 @@
 
 const APP_VERSION = '1.0.0';
 
+// Supabase Configuration (anon key is safe to expose - it's a publishable key)
+const SUPABASE_URL = 'https://ppjskgvdpyujxtwxrsiq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwanNrZ3ZkcHl1anh0d3hyc2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjczODQsImV4cCI6MjA4NTgwMzM4NH0.NVzQUEJi0wTnBv1_QVtG0Bsgn_7Ghxkrb1o0HheOv2Y';
+
 // Data Structure
 const defaultData = {
     inbox: [],
