@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Life Command Center</title>
+    <meta name="description" content="Your personal second brain - organize thoughts, track goals, manage your life">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Command Palette Overlay -->
+    <div id="command-palette" class="command-palette hidden">
+        <div class="command-palette-backdrop"></div>
+        <div class="command-palette-modal glass">
+            <div class="command-input-wrapper">
+                <svg class="command-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="command-input" placeholder="Search everything or type a command..." autocomplete="off">
+                <kbd>ESC</kbd>
+            </div>
+            <div id="command-results" class="command-results"></div>
+        </div>
+    </div>
+
+    <!-- Inbox Routing Modal -->
+    <div id="inbox-modal" class="inbox-modal hidden">
+        <div class="inbox-modal-backdrop"></div>
+        <div class="inbox-modal-content glass">
+            <div class="inbox-header">
+                <h3>🧠 Smart Routing</h3>
+                <p id="inbox-thought" class="inbox-thought"></p>
+            </div>
+            <div class="inbox-suggestion">
+                <span class="suggestion-label">Suggested:</span>
+                <span id="suggested-section" class="suggested-section"></span>
+                <span id="suggested-subsection" class="suggested-subsection"></span>
+            </div>
+            <div id="detected-date" class="detected-date hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span id="detected-date-text"></span>
+            </div>
+            <div class="inbox-actions">
+                <button id="accept-routing" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Accept
+                </button>
+                <button id="change-routing" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    Change
+                </button>
+            </div>
+            <div id="section-picker" class="section-picker hidden"></div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Mobile Header -->
+        <header class="mobile-header glass">
+            <div class="header-left">
+                <button id="menu-toggle" class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1 class="app-title">Command Center</h1>
+            </div>
+            <div class="header-right">
+                <button id="search-btn" class="icon-btn" title="Search (Ctrl+K)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar glass">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <span>Life Command Center</span>
+                </div>
+                <button id="sidebar-close" class="icon-btn mobile-only">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="9"></rect>
+                            <rect x="14" y="3" width="7" height="5"></rect>
+                            <rect x="14" y="12" width="7" height="9"></rect>
+                            <rect x="3" y="16" width="7" height="5"></rect>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="#inbox" class="nav-item" data-section="inbox">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                        </svg>
+                        Inbox
+                        <span id="inbox-count" class="badge hidden">0</span>
+                    </a>
+                    <a href="#daily" class="nav-item" data-section="daily">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Today's Focus
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Life Sections</span>
+                    <a href="#academic" class="nav-item" data-section="academic">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+                        </svg>
+                        Academic
+                    </a>
+                    <a href="#research" class="nav-item" data-section="research">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        Research
+                    </a>
+                    <a href="#brand" class="nav-item" data-section="brand">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Personal Brand
+                    </a>
+                    <a href="#jobs" class="nav-item" data-section="jobs">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                        Job Applications
+                    </a>
+                    <a href="#upskilling" class="nav-item" data-section="upskilling">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                            <polyline points="17 6 23 6 23 12"></polyline>
+                        </svg>
+                        Upskilling
+                    </a>
+                    <a href="#misc" class="nav-item" data-section="misc">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        Misc & Daily
+                    </a>
+                    <a href="#events" class="nav-item" data-section="events">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Events & Club
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Second Brain</span>
+                    <a href="#ideas" class="nav-item" data-section="ideas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Ideas Parking
+                    </a>
+                    <a href="#network" class="nav-item" data-section="network">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Network
+                    </a>
+                    <a href="#reading" class="nav-item" data-section="reading">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        Reading Queue
+                    </a>
+                    <a href="#review" class="nav-item" data-section="review">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                        Weekly Review
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="export-btn" class="btn btn-ghost">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export Brain
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Quick Input (Always Visible) -->
+            <div class="quick-input-container glass">
+                <div class="quick-input-wrapper">
+                    <textarea id="quick-input" placeholder="💭 What's on your mind? Type anything..." rows="1"></textarea>
+                    <button id="quick-submit" class="btn btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <div class="quick-input-hint">
+                    <span>Press <kbd>Enter</kbd> to submit</span>
+                    <span>•</span>
+                    <span><kbd>Ctrl</kbd>+<kbd>K</kbd> to search</span>
+                </div>
+            </div>
+
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view active">
+                <!-- Daily Goals -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>🎯 Daily Goals</h2>
+                        <button id="add-goal-btn" class="btn btn-sm btn-secondary">+ Add Goal</button>
+                    </div>
+                    <div id="daily-goals" class="daily-goals-grid"></div>
+                </div>
+
+                <!-- Today's Focus -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>⚡ Today's Focus</h2>
+                        <span class="date-display" id="today-date"></span>
+                    </div>
+                    <div id="today-focus" class="today-focus-grid"></div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>🔔 Upcoming Alerts</h2>
+                    </div>
+                    <div id="upcoming-alerts" class="alerts-list"></div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>📊 This Week</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <span class="stat-value" id="stat-added">0</span>
+                            <span class="stat-label">Items Added</span>
+                        </div>
+                        <div class="stat-card glass">
+                            <span class="stat-value" id="stat-completed">0</span>
+                            <span class="stat-label">Completed</span>
+                        </div>
+                        <div class="stat-card glass">
+                            <span class="stat-value" id="stat-pending">0</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        <div class="stat-card glass">
+                            <span class="stat-value" id="stat-streak">0</span>
+                            <span class="stat-label">Day Streak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Overview -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>📂 Quick Access</h2>
+                    </div>
+                    <div class="sections-grid">
+                        <a href="#academic" class="section-card glass" data-section="academic">
+                            <div class="section-card-icon">📚</div>
+                            <div class="section-card-info">
+                                <h3>Academic</h3>
+                                <span id="count-academic">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#research" class="section-card glass" data-section="research">
+                            <div class="section-card-icon">📄</div>
+                            <div class="section-card-info">
+                                <h3>Research</h3>
+                                <span id="count-research">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#brand" class="section-card glass" data-section="brand">
+                            <div class="section-card-icon">🎯</div>
+                            <div class="section-card-info">
+                                <h3>Personal Brand</h3>
+                                <span id="count-brand">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#jobs" class="section-card glass" data-section="jobs">
+                            <div class="section-card-icon">💼</div>
+                            <div class="section-card-info">
+                                <h3>Job Apps</h3>
+                                <span id="count-jobs">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#upskilling" class="section-card glass" data-section="upskilling">
+                            <div class="section-card-icon">📈</div>
+                            <div class="section-card-info">
+                                <h3>Upskilling</h3>
+                                <span id="count-upskilling">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#misc" class="section-card glass" data-section="misc">
+                            <div class="section-card-icon">🏠</div>
+                            <div class="section-card-info">
+                                <h3>Misc & Daily</h3>
+                                <span id="count-misc">0 items</span>
+                            </div>
+                        </a>
+                        <a href="#events" class="section-card glass" data-section="events">
+                            <div class="section-card-icon">🎪</div>
+                            <div class="section-card-info">
+                                <h3>Events & Club</h3>
+                                <span id="count-events">0 items</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inbox View -->
+            <section id="view-inbox" class="view">
+                <div class="view-header">
+                    <h2>📥 Inbox</h2>
+                    <p class="view-description">Items waiting to be routed to their sections</p>
+                </div>
+                <div id="inbox-list" class="items-list"></div>
+                <div id="inbox-empty" class="empty-state">
+                    <div class="empty-icon">📥</div>
+                    <h3>Inbox Zero! 🎉</h3>
+                    <p>All your thoughts have been organized</p>
+                </div>
+            </section>
+
+            <!-- Today's Focus View -->
+            <section id="view-daily" class="view">
+                <div class="view-header">
+                    <h2>⏰ Today's Focus</h2>
+                    <p class="view-description">What matters most today</p>
+                </div>
+                <div class="daily-container">
+                    <div class="daily-goals-section">
+                        <div class="section-header">
+                            <h3>🎯 Today's Goals</h3>
+                            <button id="add-daily-goal" class="btn btn-sm btn-primary">+ Add Goal</button>
+                        </div>
+                        <div id="daily-goals-list" class="goals-list"></div>
+                    </div>
+                    <div class="daily-schedule-section">
+                        <div class="section-header">
+                            <h3>📅 Today's Deadlines</h3>
+                        </div>
+                        <div id="today-deadlines" class="deadlines-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Academic View -->
+            <section id="view-academic" class="view">
+                <div class="view-header">
+                    <h2>📚 Academic</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="curriculum">Curriculum</button>
+                        <button class="tab-btn" data-tab="assignments">Assignments</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="curriculum">
+                    <div id="curriculum-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="academic" data-subsection="curriculum">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add to Curriculum
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="assignments">
+                    <div id="assignments-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="academic" data-subsection="assignments">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Assignment
+                    </button>
+                </div>
+            </section>
+
+            <!-- Research View -->
+            <section id="view-research" class="view">
+                <div class="view-header">
+                    <h2>📄 Research</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="papers">Papers</button>
+                        <button class="tab-btn" data-tab="whitepapers">Whitepapers</button>
+                        <button class="tab-btn" data-tab="patents">Patents</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="papers">
+                    <div id="papers-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="research" data-subsection="papers">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Paper
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="whitepapers">
+                    <div id="whitepapers-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="research" data-subsection="whitepapers">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Whitepaper
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="patents">
+                    <div id="patents-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="research" data-subsection="patents">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Patent
+                    </button>
+                </div>
+            </section>
+
+            <!-- Personal Brand View -->
+            <section id="view-brand" class="view">
+                <div class="view-header">
+                    <h2>🎯 Personal Brand</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="asymmetric">Asymmetric Plays</button>
+                        <button class="tab-btn" data-tab="hybrid">Hybrid Economies</button>
+                        <button class="tab-btn" data-tab="linkedin">LinkedIn</button>
+                        <button class="tab-btn" data-tab="instagram">Instagram</button>
+                        <button class="tab-btn" data-tab="prompts">Prompts</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="asymmetric">
+                    <div id="asymmetric-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="brand" data-subsection="asymmetric">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Content Idea
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="hybrid">
+                    <div id="hybrid-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="brand" data-subsection="hybrid">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Content Idea
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="linkedin">
+                    <div id="linkedin-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="brand" data-subsection="linkedin">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add LinkedIn Idea
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="instagram">
+                    <div id="instagram-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="brand" data-subsection="instagram">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Instagram Idea
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="prompts">
+                    <div class="prompts-section">
+                        <p class="prompts-description">Quick copy-paste templates for networking and outreach</p>
+                        <div id="prompts-list" class="prompts-grid"></div>
+                        <button class="add-item-btn glass" id="add-prompt-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Prompt Template
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Job Applications View -->
+            <section id="view-jobs" class="view">
+                <div class="view-header">
+                    <h2>💼 Job Applications</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="resumes">Resume Manager</button>
+                        <button class="tab-btn" data-tab="applications">Applications</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="resumes">
+                    <div class="resume-section">
+                        <div id="resumes-list" class="resumes-grid"></div>
+                        <button class="add-item-btn glass" id="add-resume-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Resume
+                        </button>
+                    </div>
+                </div>
+                <div class="tab-content" data-tab="applications">
+                    <div id="applications-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="jobs" data-subsection="applications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Application
+                    </button>
+                </div>
+            </section>
+
+            <!-- Upskilling View -->
+            <section id="view-upskilling" class="view">
+                <div class="view-header">
+                    <h2>📈 Upskilling</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="cfa">CFA</button>
+                        <button class="tab-btn" data-tab="gaming">Gaming Economy</button>
+                        <button class="tab-btn" data-tab="aiagents">AI Agents</button>
+                        <button class="tab-btn" data-tab="pm">Product Management</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="cfa">
+                    <div class="skill-progress glass">
+                        <div class="skill-header">
+                            <h3>CFA Progress</h3>
+                            <span id="cfa-progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="cfa-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="cfa-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="upskilling" data-subsection="cfa">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add CFA Note
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="gaming">
+                    <div class="skill-progress glass">
+                        <div class="skill-header">
+                            <h3>Gaming Economy Progress</h3>
+                            <span id="gaming-progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="gaming-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="gaming-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="upskilling" data-subsection="gaming">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Gaming Economy Note
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="aiagents">
+                    <div class="skill-progress glass">
+                        <div class="skill-header">
+                            <h3>AI Agents Progress</h3>
+                            <span id="aiagents-progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="aiagents-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="aiagents-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="upskilling" data-subsection="aiagents">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add AI Agents Note
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="pm">
+                    <div class="skill-progress glass">
+                        <div class="skill-header">
+                            <h3>Product Management Progress</h3>
+                            <span id="pm-progress-percent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="pm-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="pm-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="upskilling" data-subsection="pm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add PM Note
+                    </button>
+                </div>
+            </section>
+
+            <!-- Misc & Daily View -->
+            <section id="view-misc" class="view">
+                <div class="view-header">
+                    <h2>🏠 Misc & Daily Life</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="home">Home Stuff</button>
+                        <button class="tab-btn" data-tab="reminders">Reminders</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="home">
+                    <div id="home-list" class="items-list checklist"></div>
+                    <button class="add-item-btn glass" data-section="misc" data-subsection="home">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Home Task
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="reminders">
+                    <div id="reminders-list" class="items-list checklist"></div>
+                    <button class="add-item-btn glass" data-section="misc" data-subsection="reminders">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Reminder
+                    </button>
+                </div>
+            </section>
+
+            <!-- Events & Club View -->
+            <section id="view-events" class="view">
+                <div class="view-header">
+                    <h2>🎪 Events, Competitions & Club</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="finova">FInova</button>
+                        <button class="tab-btn" data-tab="competitions">Competitions</button>
+                        <button class="tab-btn" data-tab="events-list">Events</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="finova">
+                    <div id="finova-list" class="items-list"></div>
+                    <button class="add-item-btn glass" data-section="events" data-subsection="finova">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add FInova Item
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="competitions">
+                    <div id="competitions-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="events" data-subsection="competitions">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Competition
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="events-list">
+                    <div id="events-items-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="events" data-subsection="events-items">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Event
+                    </button>
+                </div>
+            </section>
+
+            <!-- Ideas Parking View -->
+            <section id="view-ideas" class="view">
+                <div class="view-header">
+                    <h2>💡 Ideas Parking Lot</h2>
+                    <p class="view-description">Random thoughts that don't fit anywhere yet</p>
+                </div>
+                <div id="ideas-list" class="items-list ideas-grid"></div>
+                <button class="add-item-btn glass" data-section="ideas" data-subsection="ideas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Idea
+                </button>
+            </section>
+
+            <!-- Network View -->
+            <section id="view-network" class="view">
+                <div class="view-header">
+                    <h2>👥 Network & Contacts</h2>
+                    <p class="view-description">People you meet and follow-up reminders</p>
+                </div>
+                <div id="network-list" class="items-list contacts-grid"></div>
+                <button class="add-item-btn glass" id="add-contact-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Contact
+                </button>
+            </section>
+
+            <!-- Reading Queue View -->
+            <section id="view-reading" class="view">
+                <div class="view-header">
+                    <h2>📚 Reading Queue</h2>
+                    <div class="view-tabs">
+                        <button class="tab-btn active" data-tab="to-read">To Read</button>
+                        <button class="tab-btn" data-tab="reading-now">Reading</button>
+                        <button class="tab-btn" data-tab="finished">Finished</button>
+                    </div>
+                </div>
+                <div class="tab-content active" data-tab="to-read">
+                    <div id="to-read-list" class="items-list cards-grid"></div>
+                    <button class="add-item-btn glass" data-section="reading" data-subsection="to-read">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add to Reading List
+                    </button>
+                </div>
+                <div class="tab-content" data-tab="reading-now">
+                    <div id="reading-now-list" class="items-list cards-grid"></div>
+                </div>
+                <div class="tab-content" data-tab="finished">
+                    <div id="finished-list" class="items-list cards-grid"></div>
+                </div>
+            </section>
+
+            <!-- Weekly Review View -->
+            <section id="view-review" class="view">
+                <div class="view-header">
+                    <h2>📊 Weekly Review</h2>
+                    <p class="view-description">Reflect on your progress and plan ahead</p>
+                </div>
+                <div class="review-container">
+                    <div class="review-stats glass">
+                        <h3>This Week's Stats</h3>
+                        <div class="review-stats-grid">
+                            <div class="review-stat">
+                                <span class="review-stat-value" id="review-added">0</span>
+                                <span class="review-stat-label">Items Added</span>
+                            </div>
+                            <div class="review-stat">
+                                <span class="review-stat-value" id="review-completed">0</span>
+                                <span class="review-stat-label">Completed</span>
+                            </div>
+                            <div class="review-stat">
+                                <span class="review-stat-value" id="review-deadlines-met">0</span>
+                                <span class="review-stat-label">Deadlines Met</span>
+                            </div>
+                            <div class="review-stat">
+                                <span class="review-stat-value" id="review-deadlines-missed">0</span>
+                                <span class="review-stat-label">Deadlines Missed</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="review-reflection glass">
+                        <h3>Weekly Reflection</h3>
+                        <div class="reflection-prompts">
+                            <div class="reflection-prompt">
+                                <label>What went well this week?</label>
+                                <textarea id="reflection-good" placeholder="Write your thoughts..."></textarea>
+                            </div>
+                            <div class="reflection-prompt">
+                                <label>What could be improved?</label>
+                                <textarea id="reflection-improve" placeholder="Write your thoughts..."></textarea>
+                            </div>
+                            <div class="reflection-prompt">
+                                <label>Top 3 priorities for next week:</label>
+                                <textarea id="reflection-priorities" placeholder="1. 
+2. 
+3. "></textarea>
+                            </div>
+                        </div>
+                        <button id="save-reflection" class="btn btn-primary">Save Reflection</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="mobile-nav glass">
+            <a href="#dashboard" class="mobile-nav-item active" data-section="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="9"></rect>
+                    <rect x="14" y="3" width="7" height="5"></rect>
+                    <rect x="14" y="12" width="7" height="9"></rect>
+                    <rect x="3" y="16" width="7" height="5"></rect>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="#inbox" class="mobile-nav-item" data-section="inbox">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                </svg>
+                <span>Inbox</span>
+            </a>
+            <a href="#daily" class="mobile-nav-item" data-section="daily">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Today</span>
+            </a>
+            <button id="mobile-sections-btn" class="mobile-nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Sections</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Item</h3>
+                <button id="modal-close" class="icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic form content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
