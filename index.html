@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Life Command Center</title>
     <meta name="description" content="Your personal second brain - organize thoughts, track goals, manage your life">
-    <meta name="theme-color" content="#0a0a0f">
+    <meta name="theme-color" content="#f8fafc">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Command Palette Overlay -->
     <div id="command-palette" class="command-palette hidden">
@@ -21,7 +25,8 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                <input type="text" id="command-input" placeholder="Search everything or type a command..." autocomplete="off">
+                <input type="text" id="command-input" placeholder="Search everything or type a command..."
+                    autocomplete="off">
                 <kbd>ESC</kbd>
             </div>
             <div id="command-results" class="command-results"></div>
@@ -123,7 +128,9 @@
                     <a href="#inbox" class="nav-item" data-section="inbox">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
-                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                            <path
+                                d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z">
+                            </path>
                         </svg>
                         Inbox
                         <span id="inbox-count" class="badge hidden">0</span>
@@ -157,7 +164,9 @@
                     </a>
                     <a href="#brand" class="nav-item" data-section="brand">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
                         </svg>
                         Personal Brand
                     </a>
@@ -197,7 +206,9 @@
                     <span class="nav-section-title">Second Brain</span>
                     <a href="#ideas" class="nav-item" data-section="ideas">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            <path
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                            </path>
                         </svg>
                         Ideas Parking
                     </a>
@@ -228,6 +239,16 @@
             </nav>
 
             <div class="sidebar-footer">
+                <button id="sync-btn" class="btn btn-ghost"
+                    onclick="document.getElementById('sync-modal').classList.remove('hidden')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                        <path d="M16 21h5v-5"></path>
+                    </svg>
+                    ☁️ Enable Sync
+                </button>
                 <button id="export-btn" class="btn btn-ghost">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -244,7 +265,8 @@
             <!-- Quick Input (Always Visible) -->
             <div class="quick-input-container glass">
                 <div class="quick-input-wrapper">
-                    <textarea id="quick-input" placeholder="💭 What's on your mind? Type anything..." rows="1"></textarea>
+                    <textarea id="quick-input" placeholder="💭 What's on your mind? Type anything..."
+                        rows="1"></textarea>
                     <button id="quick-submit" class="btn btn-primary btn-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -869,7 +891,9 @@
             <a href="#inbox" class="mobile-nav-item" data-section="inbox">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
-                    <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                    <path
+                        d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z">
+                    </path>
                 </svg>
                 <span>Inbox</span>
             </a>
@@ -914,6 +938,64 @@
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- Marinating Articles Modal -->
+    <div id="marinating-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeMarinatingModal()"></div>
+        <div class="modal-content glass marinating-modal-content">
+            <div class="modal-header">
+                <h3>📚 Articles Marinating Too Long!</h3>
+                <button class="icon-btn" onclick="closeMarinatingModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="marinating-description">
+                    You have <strong id="marinating-count">0</strong> articles sitting in your reading list for over 7
+                    days!
+                    Time to read them or let them go. 🍝
+                </p>
+                <div id="marinating-list" class="marinating-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Setup Modal (triggered by sync button) -->
+    <div id="sync-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="document.getElementById('sync-modal').classList.add('hidden')"></div>
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3>☁️ Cloud Sync Setup</h3>
+                <button class="icon-btn" onclick="document.getElementById('sync-modal').classList.add('hidden')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body sync-modal-body">
+                <p>Sync your data across devices using JSONBin.io (free tier).</p>
+                <ol class="sync-instructions">
+                    <li>Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> and create a free account</li>
+                    <li>Copy your API key from the dashboard</li>
+                    <li>Click the button below to set up sync</li>
+                </ol>
+                <div class="sync-status-display">
+                    <span>Status:</span>
+                    <span id="sync-status" class="sync-status local">Local only</span>
+                </div>
+                <div class="sync-actions">
+                    <button class="btn btn-primary" onclick="setupCloudSync()">🔗 Set Up Sync</button>
+                    <button class="btn btn-secondary" onclick="pullFromCloud()">⬇️ Pull from Cloud</button>
+                    <button class="btn btn-secondary" onclick="cloudSync()">⬆️ Push to Cloud</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
+
 </html>

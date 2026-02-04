@@ -4,35 +4,35 @@
 
 /* CSS Variables */
 :root {
-    /* Colors */
-    --bg-primary: #050508;
-    --bg-secondary: #0a0a0f;
-    --bg-tertiary: #12121a;
-    
-    /* Glass effects */
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-bg-hover: rgba(255, 255, 255, 0.06);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-border-hover: rgba(255, 255, 255, 0.15);
-    
-    /* Accent gradient */
-    --accent-start: #8b5cf6;
-    --accent-end: #3b82f6;
+    /* Light Theme Colors */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-tertiary: #e2e8f0;
+
+    /* Glass effects - Light */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-bg-hover: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-border-hover: rgba(0, 0, 0, 0.15);
+
+    /* Accent gradient - Vibrant purple/blue */
+    --accent-start: #7c3aed;
+    --accent-end: #2563eb;
     --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
-    --accent-glow: rgba(139, 92, 246, 0.3);
-    
-    /* Text colors */
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-tertiary: rgba(255, 255, 255, 0.4);
-    --text-muted: rgba(255, 255, 255, 0.25);
-    
+    --accent-glow: rgba(124, 58, 237, 0.25);
+
+    /* Text colors - Dark on light */
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+    --text-muted: #cbd5e1;
+
     /* Status colors */
-    --success: #22c55e;
+    --success: #10b981;
     --warning: #f59e0b;
     --error: #ef4444;
     --info: #3b82f6;
-    
+
     /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -40,29 +40,29 @@
     --spacing-lg: 24px;
     --spacing-xl: 32px;
     --spacing-2xl: 48px;
-    
+
     /* Border radius */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
     --radius-full: 9999px;
-    
+
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
     --shadow-glow: 0 0 40px var(--accent-glow);
-    
+
     /* Transitions */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
     --transition-slow: 0.4s ease;
-    
+
     /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    
+
     /* Layout */
     --sidebar-width: 280px;
     --header-height: 60px;
@@ -71,7 +71,9 @@
 }
 
 /* Reset & Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -101,8 +103,8 @@ body::after {
     width: 600px;
     height: 600px;
     border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.15;
+    filter: blur(150px);
+    opacity: 0.3;
     pointer-events: none;
     z-index: -1;
 }
@@ -491,6 +493,7 @@ body::after {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1425,6 +1428,7 @@ body::after {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1561,6 +1565,7 @@ body::after {
         opacity: 0;
         transform: scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -1811,6 +1816,7 @@ body::after {
         opacity: 0;
         transform: translateX(100px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -1908,11 +1914,11 @@ body::after {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .review-container {
         grid-template-columns: 1fr;
     }
-    
+
     .daily-container {
         grid-template-columns: 1fr;
     }
@@ -1922,39 +1928,39 @@ body::after {
     .mobile-header {
         display: flex;
     }
-    
+
     .mobile-nav {
         display: flex;
     }
-    
+
     .sidebar {
         transform: translateX(-100%);
         transition: transform var(--transition-normal);
     }
-    
+
     .sidebar.open {
         transform: translateX(0);
     }
-    
+
     .mobile-only {
         display: block;
     }
-    
+
     .main-content {
         margin-left: 0;
         padding-top: calc(var(--header-height) + var(--spacing-md));
     }
-    
+
     .quick-input-container {
         top: calc(var(--header-height) + var(--spacing-md));
         margin-left: var(--spacing-md);
         margin-right: var(--spacing-md);
     }
-    
+
     .quick-input-hint {
         display: none;
     }
-    
+
     .view-tabs {
         overflow-x: auto;
         flex-wrap: nowrap;
@@ -1964,35 +1970,35 @@ body::after {
         padding-left: var(--spacing-md);
         padding-right: var(--spacing-md);
     }
-    
+
     .tab-btn {
         flex-shrink: 0;
     }
-    
+
     .sections-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .prompts-grid,
     .resumes-grid,
     .contacts-grid,
     .ideas-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .command-palette-modal {
         margin-top: var(--spacing-lg);
     }
-    
+
     .toast-container {
         left: var(--spacing-md);
         right: var(--spacing-md);
     }
-    
+
     .toast {
         min-width: auto;
         width: 100%;
@@ -2004,40 +2010,40 @@ body::after {
         --spacing-lg: 16px;
         --spacing-xl: 24px;
     }
-    
+
     .view-header h2 {
         font-size: 1.3rem;
     }
-    
+
     .section-header h2 {
         font-size: 1rem;
     }
-    
+
     .stat-card {
         padding: var(--spacing-md);
     }
-    
+
     .stat-value {
         font-size: 1.5rem;
     }
-    
+
     .sections-grid {
         grid-template-columns: 1fr 1fr;
         gap: var(--spacing-sm);
     }
-    
+
     .section-card {
         padding: var(--spacing-md);
     }
-    
+
     .section-card-icon {
         font-size: 1.5rem;
     }
-    
+
     .section-card-info h3 {
         font-size: 0.8rem;
     }
-    
+
     .daily-goals-grid,
     .today-focus-grid,
     .cards-grid {
@@ -2074,4 +2080,203 @@ body::after {
 :focus-visible {
     outline: 2px solid var(--accent-start);
     outline-offset: 2px;
+}
+
+/* ============================================
+   Marinating Articles Modal
+   ============================================ */
+
+.marinating-modal-content {
+    max-width: 500px;
+}
+
+.marinating-description {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    font-size: 0.95rem;
+}
+
+.marinating-description strong {
+    color: var(--warning);
+    font-weight: 700;
+}
+
+.marinating-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.marinating-item {
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--warning);
+}
+
+.marinating-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.95rem;
+}
+
+.marinating-age {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.marinating-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.marinating-actions .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+}
+
+/* ============================================
+   Sync UI
+   ============================================ */
+
+.sync-modal-body {
+    text-align: left;
+}
+
+.sync-instructions {
+    margin: var(--spacing-md) 0;
+    padding-left: var(--spacing-lg);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.sync-instructions li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.sync-instructions a {
+    color: var(--accent-start);
+    text-decoration: underline;
+}
+
+.sync-status-display {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.sync-status {
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+}
+
+.sync-status.local {
+    background: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.sync-status.synced {
+    background: var(--success);
+    color: white;
+}
+
+.sync-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   Improved Mobile Styles
+   ============================================ */
+
+@media (max-width: 768px) {
+
+    /* Bigger touch targets */
+    .btn {
+        min-height: 44px;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    /* Better input sizing */
+    #quick-input {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+        padding: var(--spacing-md);
+    }
+
+    /* Cards in full width with good spacing */
+    .item-card {
+        padding: var(--spacing-md);
+    }
+
+    .item-title {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    /* Modal improvements */
+    .modal-content {
+        margin: var(--spacing-md);
+        max-height: 85vh;
+    }
+
+    .marinating-actions {
+        flex-direction: column;
+    }
+
+    .marinating-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Sidebar footer buttons stack */
+    .sidebar-footer {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    /* Tab buttons scroll horizontally */
+    .view-tabs {
+        overflow-x: auto;
+        padding-bottom: var(--spacing-sm);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+
+    .daily-goals-grid,
+    .today-focus-grid {
+        gap: var(--spacing-sm);
+    }
+
+    .goal-card,
+    .focus-card {
+        padding: var(--spacing-sm);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

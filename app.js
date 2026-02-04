@@ -101,14 +101,21 @@ const datePatterns = [
 let appData = {};
 let currentSection = 'dashboard';
 let currentTab = null;
+let syncConfig = null;
+
+// Cloud Sync Configuration - Using JSONBin.io (Free tier: 10k requests/month)
+const SYNC_STORAGE_KEY = 'lifeCommandCenter_syncConfig';
 
 // Initialize
 function init() {
     loadData();
+    loadSyncConfig();
     setupEventListeners();
     renderDashboard();
     updateTodayDate();
     setInterval(updateTodayDate, 60000);
+    checkMarinatingArticles(); // Check for stale articles
+    setInterval(checkMarinatingArticles, 3600000); // Check every hour
 }
 
 function loadData() {
@@ -120,6 +127,209 @@ function loadData() {
 
 function saveData() {
     localStorage.setItem('lifeCommandCenter', JSON.stringify(appData));
+    // Auto-sync if configured
+    if (syncConfig?.autoSync) {
+        debouncedCloudSync();
+    }
+}
+
+// Debounced cloud sync to avoid too many API calls
+let syncTimeout = null;
+function debouncedCloudSync() {
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => cloudSync(), 5000);
+}
+
+// Cloud Sync Functions
+function loadSyncConfig() {
+    const saved = localStorage.getItem(SYNC_STORAGE_KEY);
+    syncConfig = saved ? JSON.parse(saved) : null;
+    updateSyncUI();
+}
+
+function saveSyncConfig() {
+    localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(syncConfig));
+    updateSyncUI();
+}
+
+function updateSyncUI() {
+    const statusEl = document.getElementById('sync-status');
+    const btnEl = document.getElementById('sync-btn');
+    if (statusEl) {
+        statusEl.textContent = syncConfig ? 'Synced' : 'Local only';
+        statusEl.className = syncConfig ? 'sync-status synced' : 'sync-status local';
+    }
+    if (btnEl) {
+        btnEl.textContent = syncConfig ? '☁️ Synced' : '☁️ Enable Sync';
+    }
+}
+
+async function setupCloudSync() {
+    const binId = prompt('Enter your JSONBin Bin ID (or leave empty to create new):');
+    const apiKey = prompt('Enter your JSONBin API Key (get free at jsonbin.io):');
+
+    if (!apiKey) {
+        showToast('warning', 'API key required for sync');
+        return;
+    }
+
+    try {
+        if (binId) {
+            // Verify existing bin
+            syncConfig = { binId, apiKey, autoSync: true, lastSync: null };
+            await pullFromCloud();
+            showToast('success', 'Connected to existing sync!');
+        } else {
+            // Create new bin
+            const response = await fetch('https://api.jsonbin.io/v3/b', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey,
+                    'X-Bin-Name': 'life-command-center'
+                },
+                body: JSON.stringify(appData)
+            });
+            const data = await response.json();
+            if (data.metadata?.id) {
+                syncConfig = { binId: data.metadata.id, apiKey, autoSync: true, lastSync: new Date().toISOString() };
+                saveSyncConfig();
+                showToast('success', `Sync enabled! Your Bin ID: ${data.metadata.id}`);
+                alert(`Save this Bin ID to sync on other devices:\n\n${data.metadata.id}`);
+            }
+        }
+        saveSyncConfig();
+    } catch (e) {
+        showToast('error', 'Sync setup failed: ' + e.message);
+    }
+}
+
+async function cloudSync() {
+    if (!syncConfig) return;
+    try {
+        await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': syncConfig.apiKey
+            },
+            body: JSON.stringify(appData)
+        });
+        syncConfig.lastSync = new Date().toISOString();
+        saveSyncConfig();
+    } catch (e) {
+        console.error('Sync failed:', e);
+    }
+}
+
+async function pullFromCloud() {
+    if (!syncConfig) return;
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}/latest`, {
+            headers: { 'X-Master-Key': syncConfig.apiKey }
+        });
+        const data = await response.json();
+        if (data.record) {
+            appData = { ...defaultData, ...data.record };
+            saveData();
+            renderDashboard();
+            showToast('success', 'Data synced from cloud!');
+        }
+    } catch (e) {
+        showToast('error', 'Pull failed: ' + e.message);
+    }
+}
+
+// Marinating Articles Feature - Nudge users to read stale articles
+function checkMarinatingArticles() {
+    const toRead = appData.reading?.['to-read'] || [];
+    const now = new Date();
+    const MARINATE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    const marinatingArticles = toRead.filter(article => {
+        const addedDate = new Date(article.createdAt);
+        return (now - addedDate) > MARINATE_THRESHOLD && !article.dismissed;
+    });
+
+    if (marinatingArticles.length > 0 && currentSection === 'dashboard') {
+        showMarinatingModal(marinatingArticles);
+    }
+}
+
+function showMarinatingModal(articles) {
+    // Only show once per day
+    const lastShown = localStorage.getItem('lastMarinatingReminder');
+    const today = new Date().toDateString();
+    if (lastShown === today) return;
+
+    localStorage.setItem('lastMarinatingReminder', today);
+
+    const modal = document.getElementById('marinating-modal');
+    const list = document.getElementById('marinating-list');
+    const count = document.getElementById('marinating-count');
+
+    if (!modal || !list) return;
+
+    count.textContent = articles.length;
+    list.innerHTML = articles.slice(0, 5).map(a => `
+        <div class="marinating-item">
+            <div class="marinating-title">${escapeHtml(a.text || a.title)}</div>
+            <div class="marinating-age">${getDaysAgo(a.createdAt)} days old</div>
+            <div class="marinating-actions">
+                <button class="btn btn-sm btn-primary" onclick="readNow('${a.id}')">📖 Read Now</button>
+                <button class="btn btn-sm btn-secondary" onclick="snoozeArticle('${a.id}')">⏰ +3 Days</button>
+                <button class="btn btn-sm btn-ghost" onclick="dismissArticle('${a.id}')">✕ Dismiss</button>
+            </div>
+        </div>
+    `).join('');
+
+    modal.classList.remove('hidden');
+}
+
+function getDaysAgo(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    return Math.floor((now - date) / (1000 * 60 * 60 * 24));
+}
+
+function readNow(id) {
+    const article = appData.reading['to-read'].find(a => a.id === id);
+    if (article) {
+        // Move to reading-now
+        appData.reading['to-read'] = appData.reading['to-read'].filter(a => a.id !== id);
+        article.startedReading = new Date().toISOString();
+        appData.reading['reading-now'].push(article);
+        saveData();
+        closeMarinatingModal();
+        navigateTo('reading');
+        showToast('success', 'Moved to Reading Now! 📖');
+    }
+}
+
+function snoozeArticle(id) {
+    const article = appData.reading['to-read'].find(a => a.id === id);
+    if (article) {
+        // Reset the created date to give it 3 more days
+        const snoozed = new Date();
+        snoozed.setDate(snoozed.getDate() - 4); // 4 days ago, so 3 more days until 7
+        article.createdAt = snoozed.toISOString();
+        saveData();
+        closeMarinatingModal();
+        showToast('info', 'Snoozed for 3 days');
+    }
+}
+
+function dismissArticle(id) {
+    const article = appData.reading['to-read'].find(a => a.id === id);
+    if (article) {
+        article.dismissed = true;
+        saveData();
+        closeMarinatingModal();
+    }
+}
+
+function closeMarinatingModal() {
+    document.getElementById('marinating-modal')?.classList.add('hidden');
 }
 
 // Smart Router
