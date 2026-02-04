@@ -101,34 +101,48 @@ const datePatterns = [
 let appData = {};
 let currentSection = 'dashboard';
 let currentTab = null;
-let syncConfig = null;
+let supabase = null;
+let syncEnabled = false;
 
-// Cloud Sync Configuration - Using JSONBin.io (Free tier: 10k requests/month)
-const SYNC_STORAGE_KEY = 'lifeCommandCenter_syncConfig';
+// Initialize Supabase client
+function initSupabase() {
+    if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        syncEnabled = true;
+        updateSyncUI();
+        console.log('✅ Supabase connected');
+    } else {
+        console.log('⚠️ Supabase config not found - running in local-only mode');
+    }
+}
 
 // Initialize
 function init() {
     loadData();
-    loadSyncConfig();
+    initSupabase();
     setupEventListeners();
     renderDashboard();
     updateTodayDate();
     setInterval(updateTodayDate, 60000);
-    checkMarinatingArticles(); // Check for stale articles
-    setInterval(checkMarinatingArticles, 3600000); // Check every hour
+    checkMarinatingArticles();
+    setInterval(checkMarinatingArticles, 3600000);
+
+    // Initial sync from cloud on load
+    if (syncEnabled) {
+        pullFromCloud();
+    }
 }
 
 function loadData() {
     const saved = localStorage.getItem('lifeCommandCenter');
     appData = saved ? JSON.parse(saved) : { ...defaultData };
-    // Merge with defaults for new fields
     appData = { ...defaultData, ...appData };
 }
 
 function saveData() {
     localStorage.setItem('lifeCommandCenter', JSON.stringify(appData));
-    // Auto-sync if configured
-    if (syncConfig?.autoSync) {
+    // Auto-sync to Supabase
+    if (syncEnabled) {
         debouncedCloudSync();
     }
 }
@@ -137,105 +151,75 @@ function saveData() {
 let syncTimeout = null;
 function debouncedCloudSync() {
     if (syncTimeout) clearTimeout(syncTimeout);
-    syncTimeout = setTimeout(() => cloudSync(), 5000);
-}
-
-// Cloud Sync Functions
-function loadSyncConfig() {
-    const saved = localStorage.getItem(SYNC_STORAGE_KEY);
-    syncConfig = saved ? JSON.parse(saved) : null;
-    updateSyncUI();
-}
-
-function saveSyncConfig() {
-    localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(syncConfig));
-    updateSyncUI();
+    syncTimeout = setTimeout(() => syncToCloud(), 3000);
 }
 
 function updateSyncUI() {
     const statusEl = document.getElementById('sync-status');
     const btnEl = document.getElementById('sync-btn');
     if (statusEl) {
-        statusEl.textContent = syncConfig ? 'Synced' : 'Local only';
-        statusEl.className = syncConfig ? 'sync-status synced' : 'sync-status local';
+        statusEl.textContent = syncEnabled ? 'Connected' : 'Local only';
+        statusEl.className = syncEnabled ? 'sync-status synced' : 'sync-status local';
     }
     if (btnEl) {
-        btnEl.textContent = syncConfig ? '☁️ Synced' : '☁️ Enable Sync';
+        btnEl.innerHTML = syncEnabled ? '☁️ Synced' : '☁️ Local Only';
     }
 }
 
-async function setupCloudSync() {
-    const binId = prompt('Enter your JSONBin Bin ID (or leave empty to create new):');
-    const apiKey = prompt('Enter your JSONBin API Key (get free at jsonbin.io):');
-
-    if (!apiKey) {
-        showToast('warning', 'API key required for sync');
+// Sync to Supabase
+async function syncToCloud() {
+    if (!supabase || !syncEnabled) {
+        showToast('warning', 'Cloud sync not configured');
         return;
     }
 
     try {
-        if (binId) {
-            // Verify existing bin
-            syncConfig = { binId, apiKey, autoSync: true, lastSync: null };
-            await pullFromCloud();
-            showToast('success', 'Connected to existing sync!');
-        } else {
-            // Create new bin
-            const response = await fetch('https://api.jsonbin.io/v3/b', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey,
-                    'X-Bin-Name': 'life-command-center'
-                },
-                body: JSON.stringify(appData)
+        const { error } = await supabase
+            .from('user_data')
+            .upsert({
+                id: 'default_user',
+                data: appData,
+                updated_at: new Date().toISOString()
             });
-            const data = await response.json();
-            if (data.metadata?.id) {
-                syncConfig = { binId: data.metadata.id, apiKey, autoSync: true, lastSync: new Date().toISOString() };
-                saveSyncConfig();
-                showToast('success', `Sync enabled! Your Bin ID: ${data.metadata.id}`);
-                alert(`Save this Bin ID to sync on other devices:\n\n${data.metadata.id}`);
-            }
-        }
-        saveSyncConfig();
-    } catch (e) {
-        showToast('error', 'Sync setup failed: ' + e.message);
-    }
-}
 
-async function cloudSync() {
-    if (!syncConfig) return;
-    try {
-        await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': syncConfig.apiKey
-            },
-            body: JSON.stringify(appData)
-        });
-        syncConfig.lastSync = new Date().toISOString();
-        saveSyncConfig();
+        if (error) throw error;
+
+        showToast('success', '☁️ Synced to cloud!');
+        console.log('✅ Data synced to Supabase');
     } catch (e) {
         console.error('Sync failed:', e);
+        showToast('error', 'Sync failed: ' + e.message);
     }
 }
 
+// Pull from Supabase
 async function pullFromCloud() {
-    if (!syncConfig) return;
+    if (!supabase || !syncEnabled) {
+        showToast('warning', 'Cloud sync not configured');
+        return;
+    }
+
     try {
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${syncConfig.binId}/latest`, {
-            headers: { 'X-Master-Key': syncConfig.apiKey }
-        });
-        const data = await response.json();
-        if (data.record) {
-            appData = { ...defaultData, ...data.record };
-            saveData();
+        const { data, error } = await supabase
+            .from('user_data')
+            .select('data, updated_at')
+            .eq('id', 'default_user')
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows
+
+        if (data?.data && Object.keys(data.data).length > 0) {
+            appData = { ...defaultData, ...data.data };
+            localStorage.setItem('lifeCommandCenter', JSON.stringify(appData));
             renderDashboard();
-            showToast('success', 'Data synced from cloud!');
+            showToast('success', '⬇️ Data loaded from cloud!');
+            console.log('✅ Data pulled from Supabase');
+        } else {
+            // No data in cloud yet, push current data
+            await syncToCloud();
         }
     } catch (e) {
+        console.error('Pull failed:', e);
         showToast('error', 'Pull failed: ' + e.message);
     }
 }

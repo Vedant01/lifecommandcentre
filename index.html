@@ -987,14 +987,20 @@
                     <span id="sync-status" class="sync-status local">Local only</span>
                 </div>
                 <div class="sync-actions">
-                    <button class="btn btn-primary" onclick="setupCloudSync()">🔗 Set Up Sync</button>
+                    <button class="btn btn-primary" onclick="syncToCloud()">⬆️ Sync to Cloud</button>
                     <button class="btn btn-secondary" onclick="pullFromCloud()">⬇️ Pull from Cloud</button>
-                    <button class="btn btn-secondary" onclick="cloudSync()">⬆️ Push to Cloud</button>
                 </div>
+                <p class="sync-note"
+                    style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: var(--spacing-md);">
+                    Sync happens automatically when you make changes. Use these buttons for manual sync.
+                </p>
             </div>
         </div>
     </div>
 
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="app.js"></script>
 </body>
 
