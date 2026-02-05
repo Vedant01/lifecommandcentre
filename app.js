@@ -7,7 +7,6 @@ const APP_VERSION = '1.0.0';
 const SUPABASE_URL = 'https://ppjskgvdpyujxtwxrsiq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwanNrZ3ZkcHl1anh0d3hyc2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMjczODQsImV4cCI6MjA4NTgwMzM4NH0.NVzQUEJi0wTnBv1_QVtG0Bsgn_7Ghxkrb1o0HheOv2Y';
 
-// Data Structure
 const defaultData = {
     inbox: [],
     dailyGoals: [],
@@ -18,6 +17,7 @@ const defaultData = {
     upskilling: { cfa: [], gaming: [], aiagents: [], pm: [] },
     misc: { home: [], reminders: [] },
     events: { finova: [], competitions: [], 'events-items': [] },
+    media: { anime: [], movies: [], shows: [], games: [], manhwa: [] },
     ideas: [],
     network: [],
     reading: { 'to-read': [], 'reading-now': [], finished: [] },
@@ -81,6 +81,16 @@ const routingRules = {
             finova: ['finova', 'fintech club', 'club'],
             competitions: ['competition', 'hackathon', 'contest'],
             'events-items': ['event', 'meetup', 'conference']
+        }
+    },
+    media: {
+        keywords: ['anime', 'movie', 'show', 'series', 'game', 'manhwa', 'manga', 'watch', 'watching', 'played', 'finished watching'],
+        subsections: {
+            anime: ['anime', 'isekai', 'shonen', 'seinen'],
+            movies: ['movie', 'film', 'cinema'],
+            shows: ['show', 'series', 'tv', 'kdrama', 'drama'],
+            games: ['game', 'played', 'gaming', 'playing'],
+            manhwa: ['manhwa', 'manga', 'webtoon', 'manhua']
         }
     }
 };
@@ -659,6 +669,7 @@ function renderSection(section) {
         case 'ideas': renderIdeas(); break;
         case 'network': renderNetwork(); break;
         case 'reading': renderReading(); break;
+        case 'media': renderMedia(); break;
         case 'review': renderReview(); break;
     }
 }
@@ -1054,6 +1065,14 @@ function renderReading() {
     renderSubsection('to-read-list', appData.reading?.['to-read'], 'reading');
     renderSubsection('reading-now-list', appData.reading?.['reading-now'], 'reading');
     renderSubsection('finished-list', appData.reading?.finished, 'reading');
+}
+
+function renderMedia() {
+    renderSubsection('anime-list', appData.media?.anime, 'media');
+    renderSubsection('movies-list', appData.media?.movies, 'media');
+    renderSubsection('shows-list', appData.media?.shows, 'media');
+    renderSubsection('games-list', appData.media?.games, 'media');
+    renderSubsection('manhwa-list', appData.media?.manhwa, 'media');
 }
 
 function renderReview() {
