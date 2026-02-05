@@ -105,14 +105,14 @@ const datePatterns = [
 let appData = {};
 let currentSection = 'dashboard';
 let currentTab = null;
-let supabase = null;
+let supabaseClient = null;
 let syncEnabled = false;
 
 // Initialize Supabase client
 function initSupabase() {
     try {
         if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             syncEnabled = true;
             updateSyncUI();
             console.log('✅ Supabase connected');
@@ -178,13 +178,13 @@ function updateSyncUI() {
 
 // Sync to Supabase
 async function syncToCloud() {
-    if (!supabase || !syncEnabled) {
+    if (!supabaseClient || !syncEnabled) {
         showToast('warning', 'Cloud sync not configured');
         return;
     }
 
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('user_data')
             .upsert({
                 id: 'default_user',
@@ -204,13 +204,13 @@ async function syncToCloud() {
 
 // Pull from Supabase
 async function pullFromCloud(showErrors = true) {
-    if (!supabase || !syncEnabled) {
+    if (!supabaseClient || !syncEnabled) {
         if (showErrors) showToast('warning', 'Cloud sync not configured');
         return;
     }
 
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('user_data')
             .select('data, updated_at')
             .eq('id', 'default_user')
